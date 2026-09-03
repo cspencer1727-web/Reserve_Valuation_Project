@@ -8,7 +8,7 @@ A reserve is a measure of the total liability an insurance company holds with re
 
 Actuaries learn the math behind performing these calculations through a series of credentialing exams. These exams, however, assume several constants. For reserve valuation in an exam setting, discount rates, lapse, and mortality are all static. Yet in the real world, randomness plays a role in this valuation, as mortality, lapse, and interest rates are not necessarily derived from a static table.
 
-One of the main purposes this project serves is to demonstrate the difference between this stochastic method, and the deterministic pricing logic used in Actuarial exams. As such, the inputs for the reserve formula, interest rate, mortality, and lapse assumptions – are all randomized from period to period allowing a look at the trend in reserves as these different assumptions change. My analysis also includes a look at the tail risk of these assumptions, analyzing the "worst case" scenarios that an insurance company could find itself in.
+One of the main purposes this project serves is to demonstrate the difference between this stochastic method, and the deterministic pricing logic used in Actuarial exams. As such, the inputs for the reserve formula, interest rate, mortality, and lapse assumptions – are all randomized from period to period allowing a look at the trend in reserves as these different assumptions change. My analysis also includes a look at the tail risk of these assumptions, analyzing the "worst case" scenarios that an insurance company could find itself in. In testing, a policy book that was priced at a deterministic break even, meaning reserves were $0 at time 0, required a tail-scenario capital equal to 9.7% of tala face amounts, which was not captured by deterministic pricing alone. 
 
 ## Motivation
 
@@ -154,6 +154,8 @@ Dynamic lapse rates trended similarly to interest rate sensitivity, with a highe
 
 CVaR at the book level was higher than VaR, which makes mathematical sense: VaR is computed at the 95th percentile of the output distribution, marking the threshold beyond which the worst 5% of scenarios occur. CVaR then averages every scenario within that worst 5% — meaning it should always be at least as severe as VaR itself, which the test results confirm.
 
+The final test, now included in the suite, compares deterministic reserving against stochastic tail risk, showing how random shocks can cause a large deviation from deterministic pricing assumptions. Premiums are calibrated through the equivalence principle, so every deterministic policy reserve is $0 at issue. The stochastic simulation, however, shows that 95% CVaR equals 9.7% of the book's total face amount. This hidden risk in deterministic pricing is entirely overlooked by that methodology, showing the value of the stochastic reserving process, which captures the aggregate risk across changing lapse, mortality, and interest rate assumptions. 
+
 ```
 --- Test 1: Life Table Identity Check (lx - dx = lx+1) ---
 lx - dx = lx+1 holds for all rows: True
@@ -195,6 +197,12 @@ All book reserves non-negative (floor working): True
 95% VaR:  144,335.84
 95% CVaR: 205,064.52
 CVaR is more severe than VaR (CVaR >= VaR): True
+
+--- Test 8 Deterministic vs. Stochastic Reserve Gap ---
+Deterministic book reserve at issues: 0.00
+Total book face amount: 2,115,000.00
+95% CVaR as % of total face amount: 9.70
+Book priced to exact deterministic break even, but 95% CVaR required capital equal to 9.7% of total book face amount.
 
 VALIDATION SUITE COMPLETE
 ```

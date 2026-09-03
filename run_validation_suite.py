@@ -119,4 +119,22 @@ print(f"95% VaR:  {VaR_95:,.2f}")
 print(f"95% CVaR: {CVaR_95:,.2f}")
 print(f"CVaR is more severe than VaR (CVaR >= VaR): {CVaR_95 >= VaR_95}")
 
+print("--- Test 8 Deterministic vs. Stochastic Reserve Gap ---")
+
+det_total = 0
+deterministic_discounts_book = [1/(1+start_rate)**t for t in range(n_years)]
+for _, p in policy_book.iterrows():
+    qx = get_qx_for_policy(mortality_rates, p['issue_age'], n_years)
+    r = simulate_one_reserve(qx, extended_lapse, 0.0, 0.0, p['face_amount'], p['annual_premium'], deterministic_discounts_book, start_rate, long_run_mean)
+    det_total += max(0, r)
+
+total_face = policy_book['face_amount'].sum()
+CVaR_Face_Percentage = CVaR_95 / total_face * 100
+print(f"Deterministic book reserve at issues: {det_total:,.2f}")
+print(f"Total book face amount: {total_face:,.2f}")
+print(f"95% CVaR as % of total face amount: {CVaR_Face_Percentage:,.2f}")
+print(f"Book priced to exact deterministic break even, but 95% CVaR required capital")
+print(f" equal to {CVaR_Face_Percentage:.1f}% of total book face amount.")
+
+
 print("\nVALIDATION SUITE COMPLETE")
